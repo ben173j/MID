@@ -4,12 +4,18 @@ uLCD_4DGL uLCD(D1, D0, D2);
 InterruptIn button1(PA_6);//button1 used for up D12
 InterruptIn button2(PA_7);//button2 used for confirm and reselect D11
 InterruptIn button3(PA_2);//button3 used for down D10
+InterruptIn USER(USER_BUTTON);
 AnalogOut Aout(PA_4);//D7
 //AnalogOut Freq1(PA_5);//D13
 AnalogIn Ain(A0);
 EventQueue queue(32 * EVENTS_EVENT_SIZE);
+EventQueue queue1(32 * EVENTS_EVENT_SIZE);
+//EventQueue eventQueue;
+Timeout tim;
 
 Thread thread;
+Thread thread1;
+
 int Pindex;
 //42,70,98,124
 int Lindex=42;//Used for determining the position of white line
@@ -44,19 +50,108 @@ void Display()
 
 }
 
+void SAMPLE()
+{
+    for(;sam_index<sample;sam_index++){
+        ADCdata[sam_index]=Ain;
+
+    }
+    for(int k=0;k<sam_index;k++){
+        printf("%f\r\n", ADCdata[k]);
+    }
+}
+/*
+void SAMPLE()
+{   
+    for(int i=0;i<25;i++){
+        
+        printf("BUTTON2 IS PRESSED \r\n");
+        wait_us(10);
+    }
+}*/
+
+
 void freq(int index)
 {
-    for(int i=0;i<index;i++)
-    {
-        Aout = i;
-        wait_us(40);
+   // int waiting1=0,waiting2=0;
+    
+    float i=0;
+    if(index==42){
+        
+        while(1)
+        {
+            for( i=0;i<=0.9;i=i+0.018){
+                Aout = i;
+                wait_us(1550);
+
+            }
+            
+            ThisThread::sleep_for(80ms);
+            for( i=0.9; i>=0;i=i-0.018){
+                Aout=i;
+                wait_us(1550);
+            }
+             
+    
+        }
+    } 
+    else if(index == 70){
+
+        while(1)
+        {
+            for( i=0;i<=0.9;i=i+0.018){
+                Aout = i;
+                wait_us(730);
+
+            }
+            ThisThread::sleep_for(160ms);
+
+            for( i=0.9; i>=0;i=i-0.018){
+                Aout=i;
+                wait_us(730);
+            }
+        }
+
     }
-    wait_us(40);
-    for(int i=index; i>=0;i--)
-    {
-        Aout=i;
-        wait_us(40);
+
+    else if(index == 98){
+
+        while(1)
+        {
+            for( i=0;i<=0.9;i=i+0.018){
+                Aout = i;
+                wait_us(360);
+
+            }
+            ThisThread::sleep_for(200ms);
+
+            for( i=0.9; i>=0;i=i-0.018){
+                Aout=i;
+                wait_us(360);
+            }
+        }
+
     }
+
+    else{
+
+        while(1)
+        {
+            for( i=0;i<=0.9;i=i+0.018){
+                Aout = i;
+                wait_us(130);
+
+            }
+            ThisThread::sleep_for(220ms);
+
+            for( i=0.9; i>=0;i=i-0.018){
+                Aout=i;
+                wait_us(130);
+            }
+        }
+
+    }
+    
 
 }
 
@@ -79,14 +174,14 @@ void button1_push()
     } 
     moveLine(Lindex,Pindex);
     //printf("button1 is pressed!\r\n");
-    printf("Lindex: %d\r\n",Lindex);   
+   // printf("Lindex: %d\r\n",Lindex);   
 }
 
 void button2_push()
 {
 
     //ThisThread :: sleep_for(200ms);
-    printf("button2 is pressed Lindex: %d!\r\n",Lindex);
+    //printf("button2 is pressed Lindex: %d!\r\n",Lindex);
     freq(Lindex);
 }
 
@@ -98,13 +193,14 @@ void button3_push()
     if(Lindex>126) Lindex =42;
     moveLine(Lindex,Pindex);
     // printf("button3 is pressed!\r\n");
-    printf("button3 Lindex: %d \r\n",Lindex);
+    //printf("button3 Lindex: %d \r\n",Lindex);
 } 
 
 
 /*
 The main function only needs to call Display()
 */
+
 
 int main()
 {
@@ -114,5 +210,7 @@ int main()
     button1.rise(queue.event(button1_push));
     button2.rise(queue.event(button2_push));
     button3.rise(queue.event(button3_push));
-    
+    USER.rise(queue.event(SAMPLE));  
+            
+
 }
